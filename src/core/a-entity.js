@@ -253,7 +253,7 @@ var proto = Object.create(ANode.prototype, {
         throw new Error("Trying to add an element that doesn't have an `object3D`");
       }
       this.object3D.add(el.object3D);
-      this.emit('child-attached', { el: el });
+      this.emit('child-attached', { el: el }, undefined, true);
     }
   },
 
@@ -281,7 +281,7 @@ var proto = Object.create(ANode.prototype, {
       this.parentEl.remove(this);
       this.attachedToParent = false;
       this.parentEl = this.parentNode = null;
-      parentEl.emit('child-detached', {el: this});
+      parentEl.emit('child-detached', {el: this}, undefined, true);
     }
   },
 

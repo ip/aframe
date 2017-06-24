@@ -19,6 +19,7 @@ module.exports = registerElement('a-node', {
         this.isNode = true;
         this.mixinEls = [];
         this.mixinObservers = {};
+        this._delayedEvents = [];
       },
       writable: window.debug
     },
@@ -211,9 +212,22 @@ module.exports = registerElement('a-node', {
      *   Custom data to pass as `detail` to the event.
      * @param {Boolean=} [bubbles=true]
      *   Whether the event should bubble.
+     * @param {Boolean=} [delay=false]
+     *   Whether the event should be delayed with `setTimeout()`.
      */
     emit: {
-      value: function (name, detail, bubbles) {
+      value: function (name, detail, bubbles, delay) {
+        if (delay === undefined) { delay = false; }
+        if (delay) {
+          if (this._delayedEvents.length === 0) {
+            setTimeout(() => this._emitDelayedEvents());
+          }
+
+          const slicedArgs = Array.prototype.slice.call(arguments).slice(0, 3);
+          this._delayedEvents.push(slicedArgs);
+          return;
+        }
+
         var self = this;
         detail = detail || {};
         if (bubbles === undefined) { bubbles = true; }
@@ -241,6 +255,15 @@ module.exports = registerElement('a-node', {
         return function () {
           self.emit(name, detail, bubbles);
         };
+      }
+    },
+
+    _emitDelayedEvents: {
+      value: function () {
+        this._delayedEvents.forEach(args => {
+          this.emit.apply(this, args);
+        });
+        this._delayedEvents = [];
       }
     }
   })
