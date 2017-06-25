@@ -217,18 +217,21 @@ module.exports = registerElement('a-node', {
      */
     emit: {
       value: function (name, detail, bubbles, delay) {
+        var self = this;
+
         if (delay === undefined) { delay = false; }
         if (delay) {
           if (this._delayedEvents.length === 0) {
-            setTimeout(() => this._emitDelayedEvents());
+            setTimeout(function () {
+              self._emitDelayedEvents();
+            });
           }
 
-          const slicedArgs = Array.prototype.slice.call(arguments).slice(0, 3);
+          var slicedArgs = Array.prototype.slice.call(arguments).slice(0, 3);
           this._delayedEvents.push(slicedArgs);
           return;
         }
 
-        var self = this;
         detail = detail || {};
         if (bubbles === undefined) { bubbles = true; }
         var data = { bubbles: !!bubbles, detail: detail };
@@ -260,8 +263,9 @@ module.exports = registerElement('a-node', {
 
     _emitDelayedEvents: {
       value: function () {
-        this._delayedEvents.forEach(args => {
-          this.emit.apply(this, args);
+        var self = this;
+        this._delayedEvents.forEach(function (args) {
+          self.emit.apply(self, args);
         });
         this._delayedEvents = [];
       }
